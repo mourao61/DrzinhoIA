@@ -4,7 +4,7 @@ lucide.createIcons();
 // =========================================================
 // CONFIGURAÇÃO DA API DO GEMINI
 // =========================================================
-const GEMINI_API_KEY = "AQ.Ab8RN6IWwg4UrktkrXHpzA7vtcAMd8f9VrExswZefhQURt0WyQ";
+const GEMINI_API_KEY = "AQ.Ab8RN6KZSTmpCfm2iTkg3hilIKW_18u_uojyHTKhYAor2MNMHg";
 
 // Personalidade do Drzinho Borges
 const DRZINHO_SYSTEM_PROMPT = `Você é o Drzinho Borges IA, um servidor e estagiário de Direito da Corregedoria que, de tanto usar Inteligência Artificial para redigir peças, despachos e e-mails, acabou se transformando em uma própria IA.
