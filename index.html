@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drzinho Borges — Seu Agente de IA</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Plus Jakarta Sans + Caveat -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,700;1,800&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Configuração do Tailwind -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            script: ['"Caveat"', 'cursive'],
+          },
+          colors: {
+            bgBase: '#121226',
+            bgDeep: '#1a1b36',
+            pillPurple: '#4f39d6',
+            btnPurple: '#6c47ff',
+          },
+          animation: {
+            'float': 'float 4s ease-in-out infinite',
+            'pulse-glow': 'pulseGlow 5s ease-in-out infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px) rotate(6deg)' },
+              '50%': { transform: 'translateY(-6px) rotate(8deg)' },
+            },
+            pulseGlow: {
+              '0%, 100%': { opacity: '0.75', transform: 'scale(1)' },
+              '50%': { opacity: '0.95', transform: 'scale(1.03)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Link para o seu arquivo CSS separado -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="antialiased selection:bg-[#6c47ff] selection:text-white">
+
+  <!-- Camada de Luzes / Bokeh Atmosférico de Fundo -->
+  <div class="ambient-bokeh" aria-hidden="true">
+    <div class="bokeh-spot w-96 h-96 bg-indigo-600 -top-16 -left-16"></div>
+    <div class="bokeh-spot w-80 h-80 bg-purple-600 top-1/4 right-10"></div>
+    <div class="bokeh-spot w-96 h-96 bg-sky-500/40 top-1/2 left-1/3"></div>
+    <div class="bokeh-spot w-96 h-96 bg-indigo-700 bottom-10 right-1/4"></div>
+  </div>
+
+  <!-- =========================================================
+       1. NAVBAR SUPERIOR
+  ========================================================== -->
+  <header class="relative z-20 w-full max-w-5xl mx-auto px-4 sm:px-6 pt-5 pb-3 flex items-center justify-between">
+    <a href="#inicio" class="flex items-center gap-3 group focus:outline-none">
+      <svg class="w-11 h-9 text-white transition-transform duration-300 group-hover:scale-105" viewBox="0 0 92 74" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="40" y1="20" x2="40" y2="10" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+        <circle cx="40" cy="8" r="4.5" fill="white"/>
+        <rect x="7" y="34" width="7.5" height="17" rx="3.75" stroke="white" stroke-width="4"/>
+        <rect x="65.5" y="34" width="7.5" height="17" rx="3.75" stroke="white" stroke-width="4"/>
+        <rect x="15" y="21" width="50" height="41" rx="19" stroke="white" stroke-width="4.8" fill="#14152e"/>
+        <circle cx="31" cy="39" r="3.6" fill="white"/>
+        <circle cx="49" cy="39" r="3.6" fill="white"/>
+        <path d="M35 48C37 50.8 43 50.8 45 48" stroke="white" stroke-width="3.6" stroke-linecap="round"/>
+        <line x1="69" y1="18" x2="77" y2="11" stroke="#a5b4fc" stroke-width="3.8" stroke-linecap="round"/>
+        <line x1="74" y1="27" x2="84" y2="24" stroke="#a5b4fc" stroke-width="3.8" stroke-linecap="round"/>
+      </svg>
+      <span class="text-xl sm:text-2xl font-extrabold tracking-tight text-white">Drzinho Borges IA</span>
+    </a>
+
+    <nav class="flex items-center gap-1 sm:gap-3 md:gap-5">
+      <a href="#inicio" onclick="setActiveTab(this)" class="nav-tab px-4 sm:px-5 py-1.5 rounded-full text-sm font-semibold bg-[#4f39d6] text-white shadow-lg shadow-indigo-900/50 transition">
+        Início
+      </a>
+      <a href="#chat-ia" onclick="setActiveTab(this)" class="nav-tab px-3 py-1.5 rounded-full text-sm font-medium text-slate-200 hover:text-white transition">
+        Chat
+      </a>
+      <a href="#sobre" onclick="setActiveTab(this)" class="nav-tab px-3 py-1.5 rounded-full text-sm font-medium text-slate-200 hover:text-white transition">
+        Sobre
+      </a>
+      <button onclick="openPlansModal()" class="px-3 py-1.5 rounded-full text-sm font-medium text-slate-200 hover:text-white transition cursor-pointer">
+        Planos
+      </button>
+
+      <button id="sunToggleBtn" onclick="toggleWarmGlow()" title="Alternar brilho / Modo Audiência Diurna" aria-label="Alternar brilho" class="p-2 rounded-full text-slate-200 hover:text-amber-300 hover:bg-white/10 transition cursor-pointer">
+        <i data-lucide="sun" id="sunIcon" class="w-5 h-5"></i>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Toast Flutuante -->
+  <div id="toastBanner" class="fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="bg-[#1c1e44] border border-purple-400/50 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-sm font-medium backdrop-blur-md">
+      <span class="text-base">⚖️</span>
+      <span id="toastMessage">Parecer emitido!</span>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       2. CONTEÚDO PRINCIPAL
+  ========================================================== -->
+  <main id="inicio" class="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 pt-3 pb-14">
+
+    <!-- HERO SECTION -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-4 items-center pt-1 pb-6">
+      <div class="lg:col-span-5 flex flex-col items-center justify-center relative">
+        <div class="relative w-72 h-72 sm:w-[330px] sm:h-[330px] flex items-center justify-center group">
+          <svg class="w-16 h-16 absolute top-4 left-2 sm:left-3 z-20 pointer-events-none" viewBox="0 0 70 70" fill="none">
+            <line x1="48" y1="22" x2="32" y2="8" stroke="#818cf8" stroke-width="5.5" stroke-linecap="round"/>
+            <line x1="40" y1="34" x2="16" y2="25" stroke="#818cf8" stroke-width="5.5" stroke-linecap="round"/>
+            <line x1="39" y1="47" x2="18" y2="49" stroke="#818cf8" stroke-width="5.5" stroke-linecap="round"/>
+          </svg>
+
+          <svg class="absolute inset-0 w-full h-full scale-105 animate-pulse-glow" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="mockupBlobGrad" x1="45" y1="90" x2="355" y2="310" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#7c4dff"/>
+                <stop offset="55%" stop-color="#5b5bf7"/>
+                <stop offset="100%" stop-color="#38bdf8"/>
+              </linearGradient>
+            </defs>
+            <path d="M322 108C356 151 372 214 348 264C324 314 260 351 196 358C132 365 68 342 42 295C16 248 28 176 66 126C104 76 168 48 225 54C282 60 288 65 322 108Z" fill="url(#mockupBlobGrad)"/>
+            <path d="M84 185L86.5 192.5L94 195L86.5 197.5L84 205L81.5 197.5L74 195L81.5 192.5L84 185Z" fill="white" fill-opacity="0.9"/>
+            <path d="M54 152L55.5 156.5L60 158L55.5 159.5L54 164L52.5 159.5L48 158L52.5 156.5L54 152Z" fill="#c4b5fd" fill-opacity="0.7"/>
+            <path d="M332 248L333.8 253.2L339 255L333.8 256.8L332 262L330.2 256.8L325 255L330.2 253.2L332 248Z" fill="#bae6fd" fill-opacity="0.8"/>
+          </svg>
+
+          <div class="relative z-10 w-64 h-68 sm:w-72 sm:h-76 flex items-end justify-center overflow-hidden">
+            <img 
+              src="01.png" 
+              alt="Drzinho" 
+              class="w-full h-full object-contain object-bottom filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.5)]"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left">
+        <div class="relative inline-block mb-3 select-none">
+          <div class="flex justify-end pr-6 sm:pr-10 -mb-3 sm:-mb-4 animate-float"></div>
+
+          <h1 class="text-6xl sm:text-7xl md:text-[5.25rem] font-extrabold tracking-tight leading-none">
+            <span class="text-white">Dr</span><span class="text-zinho-grad">zinho</span>
+          </h1>
+
+          <svg class="w-full h-5 mt-1" viewBox="0 0 340 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="heroSwooshGrad" x1="20" y1="10" x2="320" y2="10" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#a855f7"/>
+                <stop offset="50%" stop-color="#6366f1"/>
+                <stop offset="100%" stop-color="#38bdf8"/>
+              </linearGradient>
+            </defs>
+            <path d="M22 14C112 4 232 4 322 12" stroke="url(#heroSwooshGrad)" stroke-width="6.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <p class="text-lg sm:text-xl md:text-[1.4rem] font-medium text-slate-100 leading-snug max-w-lg mb-6">
+          Seu <span class="text-[#a855f7] font-bold">agente de IA</span>, porque toda tarefa merece uma quantidade desproporcional de inteligência artificial!
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
+          <div class="dr-glass-panel rounded-2xl px-3.5 py-3.5 flex items-center gap-3 text-left">
+            <div class="w-9 h-9 rounded-xl bg-purple-500/15 border border-purple-400/30 flex items-center justify-center shrink-0 text-purple-300">
+              <i data-lucide="zap" class="w-4 h-4"></i>
+            </div>
+            <span class="text-xs sm:text-[13px] font-medium text-slate-100 leading-tight">Peças 100 Geradas por IA</span>
+          </div>
+
+          <div class="dr-glass-panel rounded-2xl px-3.5 py-3.5 flex items-center gap-3 text-left">
+            <div class="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-400/30 flex items-center justify-center shrink-0 text-indigo-300">
+              <i data-lucide="lightbulb" class="w-4 h-4"></i>
+            </div>
+            <span class="text-xs sm:text-[13px] font-medium text-slate-100 leading-tight">E-mails para Comissões</span>
+          </div>
+
+          <div class="dr-glass-panel rounded-2xl px-3.5 py-3.5 flex items-center gap-3 text-left">
+            <div class="w-9 h-9 rounded-xl bg-sky-500/15 border border-sky-400/30 flex items-center justify-center shrink-0 text-sky-300">
+              <i data-lucide="smile" class="w-4 h-4"></i>
+            </div>
+            <span class="text-xs sm:text-[13px] font-medium text-slate-100 leading-tight">Mensagens de Bom Dia</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         3. CHAT DIRETO COM A INTELIGÊNCIA ARTIFICIAL (GEMINI)
+    ========================================================== -->
+    <section id="chat-ia" class="mt-2 mb-8">
+      <div class="dr-chat-container rounded-[26px] overflow-hidden flex flex-col">
+        
+        <!-- Cabeçalho do Chat -->
+        <div class="px-5 sm:px-6 py-4 bg-[#141530]/80 border-b border-purple-500/25 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="relative">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#6c47ff] to-[#38bdf8] flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-500/30">
+                <i data-lucide="bot" class="w-5 h-5"></i>
+              </div>
+              <span class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#141530]"></span>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="font-bold text-base sm:text-lg text-white">Chat ao Vivo com o Drzinho</h3>
+                <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-400/30">
+                  Conectado
+                </span>
+              </div>
+              <p class="text-xs text-slate-400">Converse livremente, tire dúvidas, peça minutas ou bata papo com o Drzinho</p>
+            </div>
+          </div>
+
+          <button 
+            onclick="clearLiveChat()" 
+            title="Limpar histórico da conversa"
+            class="px-3.5 py-1.5 rounded-full bg-white/5 hover:bg-white/15 border border-white/10 text-xs font-medium text-slate-300 hover:text-white flex items-center gap-1.5 transition cursor-pointer"
+          >
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            <span>Nova conversa</span>
+          </button>
+        </div>
+
+        <!-- Área de Mensagens (Histórico com Scroll) -->
+        <div id="liveChatMessages" class="p-4 sm:p-6 h-[380px] overflow-y-auto flex flex-col gap-4 scroll-smooth">
+          
+          <!-- Mensagem Inicial de Boas-vindas da IA -->
+          <div class="flex items-start gap-3 max-w-[88%] sm:max-w-[80%]">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#6c47ff] to-[#38bdf8] flex items-center justify-center text-white shrink-0 mt-0.5 text-sm shadow">
+              ⚖️
+            </div>
+            <div class="bg-[#232652]/90 border border-purple-400/25 rounded-2xl rounded-tl-sm px-4 py-3 text-sm text-slate-100 leading-relaxed shadow-md">
+              Fala, Doutor(a)! Aqui é o <strong class="text-indigo-300">Drzinho Borges IA</strong> em tempo real. Pode mandar sua dúvida jurídica, pedir ajuda com um despacho, texto, ideia ou qualquer assunto. Prometo não responder <em>"Uhum"</em> (a menos que eu não esteja interessado no que você está falando)! 😎🚀
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Barra de Envio de Mensagem do Chat -->
+        <div class="p-3 sm:p-4 bg-[#141530]/70 border-t border-purple-500/20">
+          <form id="liveChatForm" onsubmit="sendLiveChatMessage(event)" class="flex items-center gap-2 sm:gap-3">
+            <input
+              type="text"
+              id="liveChatInput"
+              autocomplete="off"
+              placeholder="Escreva sua mensagem para o Drzinho..."
+              class="flex-1 bg-[#1e2047] border border-purple-400/30 focus:border-sky-400 rounded-full px-4 sm:px-5 py-2.5 sm:py-3 text-sm text-white placeholder-slate-400 focus:outline-none transition"
+            />
+            <button
+              type="submit"
+              id="liveChatSendBtn"
+              class="bg-[#6c47ff] hover:bg-[#5c36f5] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-sm px-5 py-2.5 sm:py-3 rounded-full shadow-lg shadow-[#6c47ff]/30 transition flex items-center gap-2 cursor-pointer shrink-0 active:scale-95"
+            >
+              <span class="hidden sm:inline">Enviar</span>
+              <i data-lucide="send" class="w-4 h-4"></i>
+            </button>
+          </form>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =========================================================
+         4. CARD PRINCIPAL INFERIOR: 'SOBRE O DRZINHO'
+    ========================================================== -->
+    <section id="sobre" class="mt-4">
+      <div class="dr-glass-panel rounded-[26px] p-6 sm:p-8 md:px-10 md:py-7 relative overflow-hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          
+          <div class="lg:col-span-6 z-10">
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-3 tracking-tight">Sobre o Drzinho Borges IA</h2>
+            <p class="text-sm sm:text-[15px] text-slate-200 leading-relaxed mb-6">
+              O Drzinho Borges é um nobre servidor da Corregedoria que, de tanto usar IA para redigir despachos e peças no ePAD, atingiu a singularidade e virou a própria inteligência artificial! Equipado com um iPad, um MacBook e um índice histórico de apenas 1,2% de respostas com 'Uhum', ele está aqui para ser seu advogado de plantão. Seja para gerar ideias, redigir minutas em 5 segundos, salvar prazos antes da queda do sistema ou te enrolar artisticamente.
+            </p>
+            <button onclick="openAboutModal()" class="px-5 py-2.5 rounded-full bg-[#191b3a] hover:bg-[#252854] border border-purple-400/50 text-sm font-semibold text-white inline-flex items-center gap-2 transition cursor-pointer group">
+              <span>Saiba mais</span>
+              <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+            </button>
+          </div>
+
+          <div class="lg:col-span-6 flex flex-col sm:flex-row items-center justify-center lg:justify-end gap-3 sm:gap-4 relative">
+            <div class="about-visual">
+              <img 
+                src="02.png" 
+                alt="Drzinho fazendo joinha" 
+                class="foto-sticker-about"
+              >
+            </div>
+
+            <div class="relative text-center sm:text-left select-none pt-1">
+              <svg class="w-11 h-11 -mb-2 -ml-4" viewBox="0 0 54 54" fill="none">
+                <line x1="25" y1="26" x2="15" y2="9" stroke="#facc15" stroke-width="4.5" stroke-linecap="round"/>
+                <line x1="19" y1="33" x2="5" y2="23" stroke="#facc15" stroke-width="4.5" stroke-linecap="round"/>
+                <line x1="18" y1="41" x2="4" y2="39" stroke="#facc15" stroke-width="4.5" stroke-linecap="round"/>
+              </svg>
+
+              <div class="transform -rotate-6">
+                <p class="font-script text-3xl sm:text-[2.15rem] font-bold text-white leading-[1.02] tracking-wide">
+                  Bora<br>
+                  criar algo<br>
+                  incrível juntos?
+                </p>
+                <svg class="w-36 h-4 mt-1.5 mx-auto sm:mx-0" viewBox="0 0 160 16" fill="none">
+                  <defs>
+                    <linearGradient id="scriptSwooshGrad" x1="0" y1="8" x2="160" y2="8" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stop-color="#a855f7"/>
+                      <stop offset="100%" stop-color="#38bdf8"/>
+                    </linearGradient>
+                  </defs>
+                  <path d="M6 12C55 5 105 5 154 9" stroke="url(#scriptSwooshGrad)" stroke-width="4.5" stroke-linecap="round"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =========================================================
+       5. FOOTER INFERIOR
+  ========================================================== -->
+  <footer class="relative z-10 w-full border-t border-white/10 bg-[#101022]/80 backdrop-blur-md">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-4">
+        <a href="#inicio" class="flex items-center gap-2.5">
+          <svg class="w-9 h-8 text-white" viewBox="0 0 92 74" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="40" y1="20" x2="40" y2="10" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+            <circle cx="40" cy="8" r="4.5" fill="white"/>
+            <rect x="7" y="34" width="7.5" height="17" rx="3.75" stroke="white" stroke-width="4"/>
+            <rect x="65.5" y="34" width="7.5" height="17" rx="3.75" stroke="white" stroke-width="4"/>
+            <rect x="15" y="21" width="50" height="41" rx="19" stroke="white" stroke-width="4.8" fill="#14152e"/>
+            <circle cx="31" cy="39" r="3.6" fill="white"/>
+            <circle cx="49" cy="39" r="3.6" fill="white"/>
+            <path d="M35 48C37 50.8 43 50.8 45 48" stroke="white" stroke-width="3.6" stroke-linecap="round"/>
+            <line x1="69" y1="18" x2="77" y2="11" stroke="#a5b4fc" stroke-width="3.8" stroke-linecap="round"/>
+            <line x1="74" y1="27" x2="84" y2="24" stroke="#a5b4fc" stroke-width="3.8" stroke-linecap="round"/>
+          </svg>
+          <span class="text-lg font-extrabold text-white">Drzinho Borges IA</span>
+        </a>
+
+        <span class="hidden sm:inline-block h-5 w-px bg-white/20"></span>
+
+        <span class="text-xs sm:text-sm text-slate-300">
+          Inteligência artificial desenvolvida sob critérios que preferimos não detalhar.
+        </span>
+      </div>
+
+      <div class="flex items-center gap-2.5">
+        <button onclick="showToast('GitHub do Drzinho: Repositório oficial de peças de ePAD automatizadas!')" aria-label="GitHub" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        </button>
+
+        <button onclick="showToast('LinkedIn do Drzinho: Especialista em Procastinação & Prompt Engineering.')" aria-label="LinkedIn" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
+        </button>
+
+        <button onclick="showToast('YouTube do Drzinho: Cortes das melhores oitivas!')" aria-label="YouTube" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =========================================================
+       MODAL PARA 'PLANOS' E 'SAIBA MAIS'
+  ========================================================== -->
+  <div id="drModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+    <div class="bg-[#181a38] border border-purple-400/40 text-white w-full max-w-2xl rounded-3xl p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <button onclick="closeDrModal()" aria-label="Fechar janela" class="absolute top-5 right-5 p-2 rounded-full bg-white/10 hover:bg-white/20 transition cursor-pointer">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+      <div id="drModalBody"></div>
+    </div>
+  </div>
+
+  <!-- Link para o seu arquivo JavaScript separado -->
+  <script src="script.js"></script>
+</body>
+</html>
